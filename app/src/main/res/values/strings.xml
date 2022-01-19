@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Newsly</string>
+    <string name="description_hint">Description</string>
+    <string name="news_title_hint">News Title</string>
+</resources>
