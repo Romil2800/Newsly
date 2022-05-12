@@ -29,7 +29,6 @@ class MainActivity : AppCompatActivity() {
     lateinit var adapter: NewsAdapter
     private var articles = mutableListOf<Article>()
     var pageNum = 1
-    var totalResults = -1
     private var mInterstitialAd: InterstitialAd? = null
     private var mTAG = "MainActivity"
 
@@ -39,25 +38,25 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
 
-        AdMob()
+        adMob()
 
         adapter = NewsAdapter(this@MainActivity, articles)
         binding.newsList.adapter = adapter
 
-        StackLayoutManager()
+        stackLayoutManager()
     }
 
-    private fun AdMob() {
+    private fun adMob() {
         MobileAds.initialize(this) {}
 
-        var adRequest = AdRequest.Builder().build()
+        val adRequest = AdRequest.Builder().build()
         InterstitialAd.load(
             this,
             "ca-app-pub-3940256099942544/1033173712",
             adRequest,
             object : InterstitialAdLoadCallback() {
                 override fun onAdFailedToLoad(adError: LoadAdError) {
-                    Log.d(mTAG, adError?.message)
+                  //  Log.d(mTAG, adError?.message)
                     mInterstitialAd = null
                 }
 
@@ -71,7 +70,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun StackLayoutManager() {
+    private fun stackLayoutManager() {
         val layoutManager = StackLayoutManager(StackLayoutManager.ScrollOrientation.BOTTOM_TO_TOP)
         layoutManager.setPagerMode(true)
         layoutManager.setPagerFlingVelocity(1000)
@@ -79,9 +78,6 @@ class MainActivity : AppCompatActivity() {
         layoutManager.setItemChangedListener(object : StackLayoutManager.ItemChangedListener {
             override fun onItemChanged(position: Int) {
                 binding.cardContainer.setBackgroundColor(Color.parseColor(ColorPicker.getColor()))
-                Log.d(mTAG, "First visible Item: ${layoutManager.getFirstVisibleItemPosition()}")
-                Log.d(mTAG, "Total Items on Layout: ${layoutManager.itemCount}")
-                Log.d(mTAG, "Total : ${layoutManager.childCount}")
                 if (layoutManager.getFirstVisibleItemPosition() >= layoutManager.itemCount - 5) {
                     pageNum++
                     getNews()
@@ -93,7 +89,7 @@ class MainActivity : AppCompatActivity() {
                     } else {
                         Log.d(mTAG, "The interstitial ad wasn't ready yet.")
                     }
-                    AdMob()
+                    adMob()
                 }
 
             }
@@ -107,10 +103,9 @@ class MainActivity : AppCompatActivity() {
         val news = NewsService.newsInstance.getHeadlines("in", pageNum)
         news.enqueue(object : Callback<News> {
             override fun onResponse(call: Call<News>, response: Response<News>) {
-                val news = response.body()
-                if (news != null) {
-                   // totalResults = news.totalResults
-                    articles.addAll(news.articles)
+                val newsData = response.body()
+                if (newsData != null) {
+                    articles.addAll(newsData.articles)
                     adapter.notifyDataSetChanged()
                 }
             }
